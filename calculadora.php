@@ -1,6 +1,35 @@
 <?php
 // Calculadora remota via POST
 
+header('Content-Type: application/json');
+
+// =============================
+// 1) CÁLCULO DE EXPRESSÃO COMPLETA
+// =============================
+if (isset($_POST['expr'])) {
+    $expr = $_POST['expr'];
+
+    // Permite apenas números, operadores e parênteses
+    if (!preg_match('/^[0-9+\-.*() \/]+$/', $expr)) {
+        echo json_encode(["erro" => "Expressão contém caracteres não permitidos"]);
+        exit;
+    }
+
+    try {
+        // Cálculo da expressão com segurança básica
+        $resultado = eval("return ($expr);");
+        echo json_encode(["resultado" => $resultado]);
+    } catch (Throwable $e) {
+        echo json_encode(["erro" => "Expressão inválida"]);
+    }
+
+    exit; // IMPORTANTE: encerra aqui, não deixa cair no resto do código
+}
+
+// =============================
+// 2) CÁLCULO OPERACIONAL (soma, sub, mult, div)
+// =============================
+
 // Função para validar e converter valores
 function getPostValue($key) {
     return isset($_POST[$key]) ? floatval($_POST[$key]) : null;
@@ -38,9 +67,6 @@ if ($oper1 === null || $oper2 === null || $operacao === null) {
     }
 }
 
-// Retorno em JSON
-header('Content-Type: application/json');
-
 if ($erro) {
     echo json_encode(["erro" => $erro]);
 } else {
@@ -51,3 +77,4 @@ if ($erro) {
         "resultado" => $resultado
     ]);
 }
+
